@@ -44,24 +44,19 @@ def parse(filename):
     for packet in packets:
         if packet.group(0) == '':
             continue
-        # print "Original data from packet:"
-        # print packet.group(0)+'\n\n'
-        ##### Grab attributes from beginning of packet #####
+
+        # Grab attributes from beginning of packet
         number = str(packet.group(0))[89:95].strip()
         time = str(packet.group(0))[96:106]
-        # print "Number: {}".format(number)
-        # print "Time: {}\n".format(time)
 
-        ##### Start hex decoding #####
+        # Start hex decoding
         hex_dump = re.finditer(regex2, packet.group(0), re.MULTILINE)
         hex_full = ""
         for hex_line in hex_dump:
             hex_full += hex_line.group(0)
         hex_full = hex_full.strip()
-        # print "Extracted hex values from packet data:"
-        # print hex_full+"\n"
 
-        ##### Hex attribute parsing #####
+        # Hex attribute parsing
         dest_mac = hex_full[0:18].strip().replace(" ", ":")
         source_mac = hex_full[18:35].strip().replace(" ", ":")
         ttl = _hex_to_ttl(hex_full[66:68])
@@ -72,15 +67,11 @@ def parse(filename):
         icmp_id = _hex_to_icmp_id(hex_full[114:119])
         icmp_seq_num = _hex_to_icmp_seq_num(hex_full[120:125])
         icmp_data = hex_full[126:]
-        # print "Parsed attributes from hex values:"
-        # print "Dest MAC: {}\nSource MAC: {}\nTTL: {}\nSource IP: {}\nDest IP: {}\nICMP Type: {}\nICMP ID: {}\nICMP Seq. Num: {}\nICMP Data: {}\n".format(dest_mac,source_mac,ttl,source_ip,dest_ip,icmp_message_type,icmp_id,icmp_seq_num,icmp_data)
+
         seq_nums.append(icmp_seq_num)
 
         fields = [time, ttl, source_ip, dest_ip, ip_total_length, icmp_message_type, icmp_seq_num, icmp_data]
         fields_list.append(fields)
 
-    # print fields_list
-
     c_seq_nums = Counter(seq_nums)
-    # print c_seq_nums
     return fields_list
